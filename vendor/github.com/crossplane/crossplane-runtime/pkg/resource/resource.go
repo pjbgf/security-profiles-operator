@@ -27,6 +27,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
@@ -180,10 +182,22 @@ func MustGetKind(obj runtime.Object, ot runtime.ObjectTyper) schema.GroupVersion
 type ErrorIs func(err error) bool
 
 // Ignore any errors that satisfy the supplied ErrorIs function by returning
-// nil. Errors that do not satisfy the suppled function are returned unmodified.
+// nil. Errors that do not satisfy the supplied function are returned unmodified.
 func Ignore(is ErrorIs, err error) error {
 	if is(err) {
 		return nil
+	}
+	return err
+}
+
+// IgnoreAny ignores errors that satisfy any of the supplied ErrorIs functions
+// by returning nil. Errors that do not satisfy any of the supplied functions
+// are returned unmodified.
+func IgnoreAny(err error, is ...ErrorIs) error {
+	for _, f := range is {
+		if f(err) {
+			return nil
+		}
 	}
 	return err
 }
@@ -200,6 +214,11 @@ func IsAPIError(err error) bool {
 	return ok
 }
 
+// IsAPIErrorWrapped returns true if err is a K8s API error, or recursively wraps a K8s API error
+func IsAPIErrorWrapped(err error) bool {
+	return IsAPIError(errors.Cause(err))
+}
+
 // IsConditionTrue returns if condition status is true
 func IsConditionTrue(c xpv1.Condition) bool {
 	return c.Status == corev1.ConditionTrue
@@ -207,7 +226,40 @@ func IsConditionTrue(c xpv1.Condition) bool {
 
 // An Applicator applies changes to an object.
 type Applicator interface {
-	Apply(context.Context, runtime.Object, ...ApplyOption) error
+	Apply(context.Context, client.Object, ...ApplyOption) error
+}
+
+type shouldRetryFunc func(error) bool
+
+// An ApplicatorWithRetry applies changes to an object, retrying on transient failures
+type ApplicatorWithRetry struct {
+	Applicator
+	shouldRetry shouldRetryFunc
+	backoff     wait.Backoff
+}
+
+// Apply invokes nested Applicator's Apply retrying on designated errors
+func (awr *ApplicatorWithRetry) Apply(ctx context.Context, c client.Object, opts ...ApplyOption) error {
+	return retry.OnError(awr.backoff, awr.shouldRetry, func() error {
+		return awr.Applicator.Apply(ctx, c, opts...)
+	})
+}
+
+// NewApplicatorWithRetry returns an ApplicatorWithRetry for the specified
+// applicator and with the specified retry function.
+//   If backoff is nil, then retry.DefaultRetry is used as the default.
+func NewApplicatorWithRetry(applicator Applicator, shouldRetry shouldRetryFunc, backoff *wait.Backoff) *ApplicatorWithRetry {
+	result := &ApplicatorWithRetry{
+		Applicator:  applicator,
+		shouldRetry: shouldRetry,
+		backoff:     retry.DefaultRetry,
+	}
+
+	if backoff != nil {
+		result.backoff = *backoff
+	}
+
+	return result
 }
 
 // A ClientApplicator may be used to build a single 'client' that satisfies both
@@ -218,10 +270,10 @@ type ClientApplicator struct {
 }
 
 // An ApplyFn is a function that satisfies the Applicator interface.
-type ApplyFn func(context.Context, runtime.Object, ...ApplyOption) error
+type ApplyFn func(context.Context, client.Object, ...ApplyOption) error
 
 // Apply changes to the supplied object.
-func (fn ApplyFn) Apply(ctx context.Context, o runtime.Object, ao ...ApplyOption) error {
+func (fn ApplyFn) Apply(ctx context.Context, o client.Object, ao ...ApplyOption) error {
 	return fn(ctx, o, ao...)
 }
 
@@ -336,7 +388,7 @@ func AllowUpdateIf(fn func(current, desired runtime.Object) bool) ApplyOption {
 // not exist, or patched if it does.
 //
 // Deprecated: use APIPatchingApplicator instead.
-func Apply(ctx context.Context, c client.Client, o runtime.Object, ao ...ApplyOption) error {
+func Apply(ctx context.Context, c client.Client, o client.Object, ao ...ApplyOption) error {
 	return NewAPIPatchingApplicator(c).Apply(ctx, o, ao...)
 }
 

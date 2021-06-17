@@ -139,6 +139,7 @@ type ResourceSpec struct {
 	// ProviderConfigReference specifies how the provider that will be used to
 	// create, observe, update, and delete this managed resource should be
 	// configured.
+	// +kubebuilder:default={"name": "default"}
 	ProviderConfigReference *Reference `json:"providerConfigRef,omitempty"`
 
 	// ProviderReference specifies the provider that will be used to create,
@@ -148,36 +149,15 @@ type ResourceSpec struct {
 
 	// DeletionPolicy specifies what will happen to the underlying external
 	// when this managed resource is deleted - either "Delete" or "Orphan" the
-	// external resource. The "Delete" policy is the default when no policy is
-	// specified.
-	//
+	// external resource.
 	// +optional
-	// +kubebuilder:validation:Enum=Orphan;Delete
+	// +kubebuilder:default=Delete
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy,omitempty"`
 }
 
 // ResourceStatus represents the observed state of a managed resource.
 type ResourceStatus struct {
 	ConditionedStatus `json:",inline"`
-}
-
-// A ProviderSpec defines the common way to get to the necessary objects to
-// connect to the provider.
-// Deprecated: Please use ProviderConfigSpec.
-type ProviderSpec struct {
-	// CredentialsSecretRef references a specific secret's key that contains
-	// the credentials that are used to connect to the provider.
-	// +optional
-	CredentialsSecretRef *SecretKeySelector `json:"credentialsSecretRef,omitempty"`
-}
-
-// A ProviderConfigSpec defines the desired state of a provider config. A
-// provider config may embed this type in its spec in order to support standard
-// fields. Provider configs may choose to avoid embedding this type as
-// appropriate, but are encouraged to follow its conventions.
-type ProviderConfigSpec struct {
-	// Credentials required to authenticate to this provider.
-	Credentials ProviderCredentials `json:"credentials"`
 }
 
 // A CredentialsSource is a source from which provider credentials may be
@@ -198,18 +178,45 @@ const (
 	// Workload Identity for GCP, Pod Identity for Azure, or in-cluster
 	// authentication for the Kubernetes API.
 	CredentialsSourceInjectedIdentity CredentialsSource = "InjectedIdentity"
+
+	// CredentialsSourceEnvironment indicates that a provider should acquire
+	// credentials from an environment variable.
+	CredentialsSourceEnvironment CredentialsSource = "Environment"
+
+	// CredentialsSourceFilesystem indicates that a provider should acquire
+	// credentials from the filesystem.
+	CredentialsSourceFilesystem CredentialsSource = "Filesystem"
 )
 
-// ProviderCredentials required to authenticate.
-type ProviderCredentials struct {
-	// Source of the provider credentials.
-	// +kubebuilder:validation:Enum=None;Secret;InjectedIdentity
-	Source CredentialsSource `json:"source"`
+// CommonCredentialSelectors provides common selectors for extracting
+// credentials.
+type CommonCredentialSelectors struct {
+	// Fs is a reference to a filesystem location that contains credentials that
+	// must be used to connect to the provider.
+	// +optional
+	Fs *FsSelector `json:"fs,omitempty"`
 
-	// A CredentialsSecretRef is a reference to a secret key that contains the
-	// credentials that must be used to connect to the provider.
+	// Env is a reference to an environment variable that contains credentials
+	// that must be used to connect to the provider.
+	// +optional
+	Env *EnvSelector `json:"env,omitempty"`
+
+	// A SecretRef is a reference to a secret key that contains the credentials
+	// that must be used to connect to the provider.
 	// +optional
 	SecretRef *SecretKeySelector `json:"secretRef,omitempty"`
+}
+
+// EnvSelector selects an environment variable.
+type EnvSelector struct {
+	// Name is the name of an environment variable.
+	Name string `json:"name"`
+}
+
+// FsSelector selects a filesystem location.
+type FsSelector struct {
+	// Path is a filesystem path.
+	Path string `json:"path"`
 }
 
 // A ProviderConfigStatus defines the observed status of a ProviderConfig.
