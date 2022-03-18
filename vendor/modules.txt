@@ -142,7 +142,7 @@ github.com/go-git/go-git/v5/utils/merkletrie/filesystem
 github.com/go-git/go-git/v5/utils/merkletrie/index
 github.com/go-git/go-git/v5/utils/merkletrie/internal/frame
 github.com/go-git/go-git/v5/utils/merkletrie/noder
-# github.com/go-logr/logr v0.4.0
+# github.com/go-logr/logr v1.2.0
 ## explicit
 github.com/go-logr/logr
 # github.com/gobuffalo/flect v0.2.3
@@ -697,14 +697,18 @@ k8s.io/client-go/util/workqueue
 # k8s.io/component-base v0.22.3
 k8s.io/component-base/config
 k8s.io/component-base/config/v1alpha1
-# k8s.io/klog/v2 v2.10.0
+# k8s.io/klog/v2 v2.60.0
 ## explicit
 k8s.io/klog/v2
+k8s.io/klog/v2/internal/buffer
+k8s.io/klog/v2/internal/serialize
+k8s.io/klog/v2/internal/severity
 k8s.io/klog/v2/klogr
 # k8s.io/kube-openapi v0.0.0-20210421082810-95288971da7e
 k8s.io/kube-openapi/pkg/util/proto
-# k8s.io/utils v0.0.0-20210819203725-bdf08cb9a70a
+# k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 k8s.io/utils/buffer
+k8s.io/utils/clock
 k8s.io/utils/integer
 k8s.io/utils/pointer
 k8s.io/utils/trace
