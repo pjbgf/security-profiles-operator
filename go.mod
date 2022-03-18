@@ -8,7 +8,7 @@ require (
 	github.com/cobaugh/osrelease v0.0.0-20181218015638-a93a0a55a249
 	github.com/containers/common v0.46.0
 	github.com/crossplane/crossplane-runtime v0.14.1-0.20210713194031-85b19c28ea88
-	github.com/go-logr/logr v0.4.0
+	github.com/go-logr/logr v1.2.3
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.4.1
 	github.com/nxadm/tail v1.4.8
 	github.com/pkg/errors v0.9.1
