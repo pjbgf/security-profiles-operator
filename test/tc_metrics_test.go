@@ -26,6 +26,10 @@ import (
 const profileName = "metrics-profile"
 
 func (e *e2e) testCaseSeccompMetrics(nodes []string) {
+	if e.skipFlakyTests {
+		return
+	}
+
 	e.seccompOnlyTestCase()
 	e.singleNodeTestCase()
 

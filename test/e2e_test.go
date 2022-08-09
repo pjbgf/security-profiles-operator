@@ -146,6 +146,10 @@ func (e *e2e) TestSecurityProfilesOperator() {
 	// TODO(jaosorior): Re-introduce this to the namespaced tests once we
 	// fix the issue with the certs.
 	e.Run("cluster-wide: Seccomp: Verify profile binding", func() {
+		if e.skipFlakyTests {
+			return
+		}
+
 		e.testCaseSeccompProfileBinding(nodes)
 	})
 
@@ -174,6 +178,10 @@ func (e *e2e) TestSecurityProfilesOperator() {
 	})
 
 	e.Run("cluster-wide: Seccomp: Verify profile recording bpf", func() {
+		if e.skipFlakyTests {
+			return
+		}
+
 		e.testCaseBpfRecorderKubectlRun()
 		e.testCaseBpfRecorderStaticPod()
 		e.testCaseBpfRecorderMultiContainer()

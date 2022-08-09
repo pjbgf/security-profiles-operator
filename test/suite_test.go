@@ -94,6 +94,7 @@ type e2e struct {
 	labelPodDenialsEnabled bool
 	bpfRecorderEnabled     bool
 	skipNamespacedTests    bool
+	skipFlakyTests         bool
 	testWebhookConfig      bool
 	singleNodeEnvironment  bool
 	logger                 logr.Logger
@@ -196,6 +197,9 @@ func TestSuite(t *testing.T) {
 				skipNamespacedTests:    skipNamespacedTests,
 				operatorManifest:       operatorManifest,
 				testWebhookConfig:      testWebhookConfig,
+
+				// TODO(pjbgf): load value from environment
+				skipFlakyTests: true,
 			},
 			"", "",
 		})
