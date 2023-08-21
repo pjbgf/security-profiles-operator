@@ -67,6 +67,12 @@ type ConnectionDetailsPublisherTo interface {
 	GetPublishConnectionDetailsTo() *xpv1.PublishConnectionDetailsTo
 }
 
+// A Manageable resource may specify a ManagementPolicies.
+type Manageable interface {
+	SetManagementPolicies(p xpv1.ManagementPolicies)
+	GetManagementPolicies() xpv1.ManagementPolicies
+}
+
 // An Orphanable resource may specify a DeletionPolicy.
 type Orphanable interface {
 	SetDeletionPolicy(p xpv1.DeletionPolicy)
@@ -123,11 +129,25 @@ type CompositionRevisionReferencer interface {
 	GetCompositionRevisionReference() *corev1.ObjectReference
 }
 
+// A CompositionRevisionSelector may reference a set of
+// composition revisions.
+type CompositionRevisionSelector interface {
+	SetCompositionRevisionSelector(selector *metav1.LabelSelector)
+	GetCompositionRevisionSelector() *metav1.LabelSelector
+}
+
 // A CompositionUpdater uses a composition, and may update which revision of
 // that composition it uses.
 type CompositionUpdater interface {
 	SetCompositionUpdatePolicy(*xpv1.UpdatePolicy)
 	GetCompositionUpdatePolicy() *xpv1.UpdatePolicy
+}
+
+// A CompositeResourceDeleter creates a composite, and controls the policy
+// used to delete the composite.
+type CompositeResourceDeleter interface {
+	SetCompositeDeletePolicy(policy *xpv1.CompositeDeletePolicy)
+	GetCompositeDeletePolicy() *xpv1.CompositeDeletePolicy
 }
 
 // A ComposedResourcesReferencer may reference the resources it composes.
@@ -176,6 +196,7 @@ type Managed interface {
 	ProviderConfigReferencer
 	ConnectionSecretWriterTo
 	ConnectionDetailsPublisherTo
+	Manageable
 	Orphanable
 
 	Conditioned
@@ -221,6 +242,7 @@ type Composite interface {
 	CompositionReferencer
 	CompositionUpdater
 	CompositionRevisionReferencer
+	CompositionRevisionSelector
 	ComposedResourcesReferencer
 	EnvironmentConfigReferencer
 	ClaimReferencer
@@ -248,6 +270,8 @@ type CompositeClaim interface {
 	CompositionReferencer
 	CompositionUpdater
 	CompositionRevisionReferencer
+	CompositionRevisionSelector
+	CompositeResourceDeleter
 	CompositeResourceReferencer
 	LocalConnectionSecretWriterTo
 	ConnectionDetailsPublisherTo
