@@ -33,7 +33,7 @@ ARG BPF_ENABLED=0
 RUN make
 
 # hash below referred to latest
-FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:9a9149dbba8dc5a961dfec460018c245b49da0f52e9934e1a70dd4d42f9fc5b7
+FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:8e68a739db66e514ce9ccfac7421e83d03180045e0a16ccf949cdac884150e5f
 ARG version
 USER root
 
