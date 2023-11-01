@@ -9,7 +9,7 @@ require (
 	github.com/cert-manager/cert-manager v1.9.1
 	github.com/containers/common v0.48.1-0.20220510094751-400832f41771
 	github.com/crossplane/crossplane-runtime v0.18.0
-	github.com/go-logr/logr v1.2.3
+	github.com/go-logr/logr v1.3.0
 	github.com/jellydator/ttlcache/v3 v3.0.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.5.0
 	github.com/mogensen/kubernetes-split-yaml v0.3.0
@@ -30,7 +30,7 @@ require (
 	k8s.io/api v0.25.3
 	k8s.io/apimachinery v0.25.3
 	k8s.io/client-go v0.25.3
-	k8s.io/klog/v2 v2.80.1
+	k8s.io/klog/v2 v2.110.1
 	sigs.k8s.io/controller-runtime v0.12.3
 	sigs.k8s.io/controller-tools v0.10.0
 	sigs.k8s.io/mdtoc v1.1.0
