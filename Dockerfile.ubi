@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # hash below referred to `:36` tag
-FROM registry.fedoraproject.org/fedora-minimal@sha256:b676cdd0fdefe33124325082d070c39558f1966a63dfd1193681a7900707d332 AS build
+FROM registry.fedoraproject.org/fedora-minimal@sha256:0f8408100c4e570f0fa724a75adb729d1103aa77b924e5827316efd90da615b2 AS build
 USER root
 WORKDIR /work
 
